@@ -12,9 +12,11 @@ export default function AlbumSearchForm({searchCallback, isWaiting}) {
   }
 
   const handleSubmit = (event) => {
-    event.preventDefault();
+    event.preventDefault(); 
+    searchCallback(encodeURIComponent(queryText)); 
+  };
 
-  }
+
 
   return (
     <div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -6,14 +6,36 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 
 const TRACK_QUERY_TEMPLATE = 'https://itunes.apple.com/lookup?id={collectionId}&limit=50&entity=song'
 
-export default function TrackList({setAlertMessage}) { //setAlertMessage callback as prop
-  const [trackData, setTrackData] = useState([]); //tracks to show
-  const [isQuerying, setIsQuerying] = useState(false); //for spinner
-  const [previewAudio, setPreviewAudio] = useState(null); //for playing previews!
-
+export default function TrackList({setAlertMessage}) { 
+  const [trackData, setTrackData] = useState([]); 
+  const [isQuerying, setIsQuerying] = useState(false); 
+  const [previewAudio, setPreviewAudio] = useState(null); 
   const urlParams = useParams(); //get album from URL
 
   //YOUR CODE GOES HERE
+  useEffect(() => {
+    setIsQuerying(true);
+    const urlTracker = TRACK_QUERY_TEMPLATE.replace("{collectionId}", [urlParams.collectionId])
+
+    fetch(urlTracker) 
+      .then(response => response.json()) 
+      .then(data => {
+        if(data.results && data.results.length > 0) {
+          setTrackData(data.results.slice(1)); 
+        } else {
+          setAlertMessage("No tracks found for album.");
+        }
+      })
+      .catch(error => { 
+        setAlertMessage(error.message)
+      })
+      .then(() =>
+        setIsQuerying(false))
+      .catch(error => { 
+        setAlertMessage(error.message)
+      })
+
+  }, [urlParams.collectionId], [setAlertMessage])
 
 
   //for fun: allow for clicking to play preview audio!

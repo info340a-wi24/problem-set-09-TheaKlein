@@ -10,8 +10,33 @@ import TrackList from './TrackList';
 const ALBUM_QUERY_TEMPLATE = "https://itunes.apple.com/search?limit=25&term={searchTerm}&entity=album&attribute=allArtistTerm"
 
 function App(props) {
-  const [albumData, setAlbumData] = useState([]);
-  const [alertMessage, setAlertMessage] = useState(null);
+  const [albumData, setAlbumData] = useState([]); 
+  const [alertMessage, setAlertMessage] = useState(null); 
+  const [isSearching, setIsSearching] = useState(false);
+
+  const fetchAlbumList = (searchTerm) => {
+    setIsSearching(true);
+    const apiUrl = ALBUM_QUERY_TEMPLATE.replace("{searchTerm}", searchTerm);
+
+    fetch(apiUrl) 
+      .then(response => response.json()) 
+      .then(data => {
+        if(data.results.length === 0) { 
+          setAlertMessage("No results found.");
+        } else {
+          setAlbumData(data.results); 
+        }
+      })
+      .catch(error => { 
+        setAlertMessage(error.message)
+      })
+      .then(() =>
+        setIsSearching(false))
+      .catch(error => {
+        console.error(error);
+      });
+  };
+  
 
   return (
     <div className="container">
@@ -30,7 +55,7 @@ function App(props) {
         <Routes>
           <Route path="/" element={
             <> {/* Search Page */}
-              <AlbumSearchForm />
+              <AlbumSearchForm searchCallback={fetchAlbumList} isWaiting={isSearching}/>
               <AlbumList albums={albumData} />
             </>
           } />
